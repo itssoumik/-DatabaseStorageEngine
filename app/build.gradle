@@ -1,0 +1,29 @@
+plugins {
+    // Apply the application plugin to add support for building a CLI application in Java.
+    id 'application' 
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit 5 for testing
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // If you need Google Guava or other libs, add them here
+    implementation 'com.google.guava:guava:32.1.1-jre'
+}
+
+application {
+    // Define the main class for the application.
+    // MUST match your package structure in Main.java
+    mainClass = 'com.jdb.Main' 
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // Or 21, depending on your JDK
+    }
+}
