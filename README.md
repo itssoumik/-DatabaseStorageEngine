@@ -25,14 +25,14 @@ It is ideal for educational purposes, research, or as the engine for a custom da
 ---
 
 ## **Features**
-- ✅ Pure Java implementation (no JDBC, no external DBs)  
-- ✅ Paged on-disk file architecture (4KB block size)  
-- ✅ Custom binary serialization for primitive and variable-length data  
-- ✅ Slotted-page heap file structure  
-- ❇️ B+ Tree index for `O(log N)` record lookups  
-- ❇️ Buffer Pool with LRU eviction policy  
-- ❇️ Dirty-page tracking for consistent writes  
-- ❇️ Disk-aware data structures (page-aligned nodes)  
+- Pure Java implementation (no JDBC, no external DBs)  
+- Paged on-disk file architecture (4KB block size)  
+- Custom binary serialization for primitive and variable-length data  
+- Slotted-page heap file structure  
+- B+ Tree index for `O(log N)` record lookups  
+- Buffer Pool with LRU eviction policy  
+- Dirty-page tracking for consistent writes  
+- Disk-aware data structures (page-aligned nodes)  
 
 ---
 
