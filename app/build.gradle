@@ -24,6 +24,6 @@ application {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17) // Or 21, depending on your JDK
+        languageVersion = JavaLanguageVersion.of(21) 
     }
 }
