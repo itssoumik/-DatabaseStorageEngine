@@ -27,3 +27,12 @@ java {
         languageVersion = JavaLanguageVersion.of(21) 
     }
 }
+
+test {
+    useJUnitPlatform()
+    
+    // Optional: Prints "PASSED", "FAILED", "SKIPPED" to the console
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}

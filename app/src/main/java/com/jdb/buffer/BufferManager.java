@@ -79,4 +79,14 @@ public class BufferManager {
         }
         pageCache.clear();
     }
+
+    public int allocateNewPage() {
+        // Calculate new ID based on current file size
+        int newPageId = diskManager.getNumPages();
+        // Just reading it will create it in our specific HeapFile implementation logic
+        // But explicitly, we should create a blank page
+        Page p = new Page(newPageId);
+        diskManager.writePage(p); 
+        return newPageId;
+    }
 }

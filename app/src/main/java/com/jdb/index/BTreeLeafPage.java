@@ -57,6 +57,31 @@ public class BTreeLeafPage extends BTreePage {
         return null;
     }
 
+    /**
+     * Splits this full leaf page.
+     * 1. Moves the upper half of keys/values to the 'recipient' page.
+     * 2. Returns the first key of the new page (to be inserted into parent).
+     */
+    public int split(BTreeLeafPage recipient) {
+        int count = getKeyCount();
+        int splitIndex = count / 2;
+        int newCount = count - splitIndex;
+
+        // Move entries from splitIndex -> end to the recipient
+        for (int i = 0; i < newCount; i++) {
+            int srcIndex = splitIndex + i;
+            recipient.setKeyAt(i, getKeyAt(srcIndex));
+            recipient.setValueAt(i, getValueAt(srcIndex));
+        }
+
+        // Update counts
+        recipient.setKeyCount(newCount);
+        this.setKeyCount(splitIndex);
+
+        // Return the first key of the new page (this is the key that goes up)
+        return recipient.getKeyAt(0);
+    }
+
     // --- Helpers to read/write specific slots ---
 
     private int getKeyAt(int index) {
