@@ -36,3 +36,7 @@ test {
         events "passed", "skipped", "failed"
     }
 }
+
+run {
+    standardInput = System.in
+}
