@@ -12,19 +12,12 @@ public class Main {
         System.out.println("=== JDB Storage Engine Starting ===");
         Scanner scanner = new Scanner(System.in);
 
-        
         // 1. Setup Phase (Initialization)
-     
-        
         File dbFile = new File("data.db");
         File indexFile = new File("index.db");
 
         // Check if DB exists so we know whether to Load or Create
         boolean isExistingDb = dbFile.exists();
-
-        // Clean start for this demo session
-        // if(dbFile.exists()) dbFile.delete();       // <--- DISABLED for persistence
-        // if(indexFile.exists()) indexFile.delete(); // <--- DISABLED for persistence
 
         // Define Schema: [ID (Int), Name (String), Age (Int)]
         TupleDesc schema = new TupleDesc();
@@ -38,13 +31,11 @@ public class Main {
         BufferManager bm = new BufferManager(heapFile, 50); 
         
         // Initialize active Storage Page (Page 0)
-        // Note: In a full implementation, the BufferManager creates/fetches this.
-        
         HeapPage heapPage;
 
         if (isExistingDb) {
             System.out.println(">> Found existing data. Loading Page 0...");
-            // Load the existing page from disk so we don't overwrite it with a blank one
+            // Load the existing page from disk
             Page p0 = heapFile.readPage(0);
             heapPage = new HeapPage(p0);
         } else {
@@ -58,7 +49,8 @@ public class Main {
         HeapFile indexDisk = new HeapFile(indexFile);
         
         // Only initialize the root page on disk if it's a NEW database
-        if (!isExistingDb) {
+        // If it's an existing DB, we assume index.db has valid data from the flushAllPages call
+        if (!isExistingDb || !indexFile.exists()) {
             Page rootPage = new Page(0);
             indexDisk.writePage(rootPage);
         }
@@ -68,9 +60,7 @@ public class Main {
 
         System.out.println("Storage Engine Initialized. Ready for commands.");
 
-       
         // 2. Interactive Loop
-     
         boolean running = true;
 
         while (running) {
@@ -106,9 +96,6 @@ public class Main {
                         t.setField(1, name);
                         t.setField(2, age);
 
-                        // Insert into Storage
-                        // Note: If Page 0 fills up, this simple demo might throw an error 
-                        // unless you add logic to allocate Page 1.
                         int slot = heapPage.insertTuple(t);
                         
                         // Insert into Index
@@ -134,14 +121,10 @@ public class Main {
                             System.out.println("Location: Page " + rid.pageId + ", Slot " + rid.slotNumber);
                             
                             // Retrieve data
-                            // In this demo, we check if the data is in our current 'heapPage' memory object
-                            // or read from disk if we had flushed it previously.
                             Tuple result;
                             if (rid.pageId == 0) {
-                                // For this simple demo, we read directly from the active memory page
                                 result = heapPage.getTuple(rid.slotNumber, schema);
                             } else {
-                                // Fallback for multipage (not fully implemented in Main)
                                 Page fetchedPage = heapFile.readPage(rid.pageId);
                                 HeapPage fetchedHeapPage = new HeapPage(fetchedPage);
                                 result = fetchedHeapPage.getTuple(rid.slotNumber, schema);
@@ -160,8 +143,19 @@ public class Main {
 
                 case 3: // EXIT
                     System.out.println("Flushing data to disk...");
+                    
+                    // 1. Flush Data Page
                     heapFile.writePage(heapPage.getPage());
-                    System.out.println("Data saved. Shutting down.");
+                    
+                    // 2. Flush Index Pages (THIS WAS MISSING)
+                    try {
+                    
+                        indexBm.flushAll(); 
+                    } catch (Exception e) {
+                        System.out.println("Warning: Error flushing index: " + e.getMessage());
+                    }
+
+                    System.out.println("Data and Index saved. Shutting down.");
                     running = false;
                     break;
 
@@ -172,16 +166,12 @@ public class Main {
         
         scanner.close();
 
-        // // ==========================================
-        // // NEW: Auto-run the DBReader on exit
-        // // ==========================================
-        // System.out.println("\n=== AUTO-TRIGGER: Running DBReader... ===");
-        // try {
-        //     // This calls the main() method of the DBReader class
-        //     DBReader.main(args); 
-        // } catch (Exception e) {
-        //     System.out.println("Could not run DBReader. Check if DBReader.java exists.");
-        //     e.printStackTrace();
-        // }
+        System.out.println("\n=== AUTO-TRIGGER: Running DBReader... ===");
+        try {
+            DBReader.main(args); 
+        } catch (Exception e) {
+            System.out.println("Could not run DBReader. Check if DBReader.java exists.");
+            e.printStackTrace();
+        }
     }
 }
